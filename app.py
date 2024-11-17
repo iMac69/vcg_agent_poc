@@ -1,5 +1,3 @@
-# app.py
-
 """
 AI Chat Agent for Brand Archetype Classification
 
@@ -13,6 +11,7 @@ client's environment.
 
 import os
 import re
+import sys
 
 import numpy as np
 import streamlit as st
@@ -50,6 +49,7 @@ dialogue_generator = pipeline(
     temperature=0.7,
 )
 
+
 def analyze_sentiment(text):
     """
     Analyze the sentiment of the given text.
@@ -65,6 +65,7 @@ def analyze_sentiment(text):
     scores = outputs.logits.softmax(dim=1).detach().numpy()[0]
     sentiment_score = scores[1] - scores[0]
     return sentiment_score
+
 
 def load_documents(folder_path):
     """
@@ -82,6 +83,7 @@ def load_documents(folder_path):
                       encoding='utf-8') as f:
                 documents[filename] = f.read()
     return documents
+
 
 def chunk_document(text, max_words=1000):
     """
@@ -111,6 +113,7 @@ def chunk_document(text, max_words=1000):
         chunks.append(current_chunk.strip())
     return chunks
 
+
 def prepare_chunks(documents):
     """
     Prepare chunks from the provided documents.
@@ -136,6 +139,7 @@ def prepare_chunks(documents):
             all_chunks.append(chunk_data)
     return all_chunks
 
+
 def index_chunks(chunks, model, index):
     """
     Generate embeddings for each chunk and store them in a local index.
@@ -151,6 +155,7 @@ def index_chunks(chunks, model, index):
             'embedding': embedding,
             'metadata': chunk['metadata']
         }
+
 
 def display_introduction():
     """Display the introduction text."""
@@ -169,6 +174,7 @@ def display_introduction():
     Let's dive in!
     """
     st.write(introduction_text)
+
 
 def display_conclusion(primary, secondary):
     """
@@ -197,6 +203,7 @@ def display_conclusion(primary, secondary):
     If you have any feedback or would like to discuss these archetypes further,
     feel free to let me know!"""
     st.write(conclusion_text)
+
 
 def generate_dynamic_response(conversation_history):
     """
@@ -230,6 +237,7 @@ def generate_dynamic_response(conversation_history):
 
     return response
 
+
 def interview_flow(questions, responses_key='responses'):
     """
     Manage the interview flow by presenting questions and capturing responses,
@@ -259,10 +267,18 @@ def interview_flow(questions, responses_key='responses'):
             st.markdown(f"**You:** {message['content']}")
 
     # If it's the first message or the last message was from the user, the assistant asks a question
-    if len(st.session_state['conversation']) == 0 or st.session_state['conversation'][-1]['role'] == 'user':
+    if (
+        len(st.session_state['conversation']) == 0
+        or st.session_state['conversation'][-1]['role'] == 'user'
+    ):
+        # Fetch the current question based on the current question index
         current_question = questions[current_q_idx]
-        st.session_state['conversation'].append({'role': 'assistant', 'content': current_question})
-        st.experimental_rerun()
+        
+        # Append the assistant's question to the conversation
+        st.session_state['conversation'].append({
+            'role': 'assistant',
+            'content': current_question
+        })
 
     # User inputs their response
     user_response = st.text_area("Your Answer:", key=f"user_response_{current_q_idx}")
@@ -285,7 +301,6 @@ def interview_flow(questions, responses_key='responses'):
             if should_move_to_next_question(assistant_response):
                 st.session_state['current_question'] += 1
 
-            st.experimental_rerun()
 
 def should_move_to_next_question(assistant_response):
     """
@@ -305,6 +320,7 @@ def should_move_to_next_question(assistant_response):
         return True
     else:
         return False
+
 
 def get_archetype_embedding(archetype_name, index):
     """
@@ -328,6 +344,7 @@ def get_archetype_embedding(archetype_name, index):
     # Calculate the average embedding
     archetype_embedding = np.mean(embeddings, axis=0).tolist()
     return archetype_embedding
+
 
 def classify_archetypes(user_responses, documents, model, index):
     """
@@ -384,6 +401,7 @@ def classify_archetypes(user_responses, documents, model, index):
     )
 
     return primary_archetype, secondary_archetype
+
 
 def main():
     """Main function to run the Streamlit app."""
@@ -462,19 +480,6 @@ def main():
             # Display Conclusion
             display_conclusion(primary, secondary)
 
-    # Reset functionality (optional)
-    if st.button("Restart Interview"):
-        keys_to_reset = [
-            'conversation',
-            'current_question',
-            'responses',
-            'processed',
-            'introduction_displayed'
-        ]
-        for key in keys_to_reset:
-            if key in st.session_state:
-                del st.session_state[key]
-        st.experimental_rerun()
 
 if __name__ == "__main__":
     main()
