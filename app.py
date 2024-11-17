@@ -32,7 +32,16 @@ model_sentiment = AutoModelForSequenceClassification.from_pretrained(
     "distilbert-base-uncased-finetuned-sst-2-english"
 )
 
-# Load the language generation model (e.g., DialoGPT)
+# Use a pipeline as a high-level helper
+from transformers import pipeline
+
+messages = [
+    {"role": "user", "content": "Who are you?"},
+]
+pipe = pipeline("text-generation", model="microsoft/DialoGPT-medium")
+pipe(messages)
+
+# Define tokenizer_dialogue and model_dialogue for the dialogue generator
 tokenizer_dialogue = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model_dialogue = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
