@@ -45,6 +45,15 @@ pipe(messages)
 tokenizer_dialogue = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model_dialogue = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
+import warnings
+
+# Correctly use FutureWarning from the warnings module
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    module="huggingface_hub.file_download"
+)
+
 # Initialize the dialogue generation pipeline
 dialogue_generator = pipeline(
     "text-generation",
