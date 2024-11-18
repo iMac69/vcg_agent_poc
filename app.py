@@ -32,6 +32,18 @@ model_sentiment = AutoModelForSequenceClassification.from_pretrained(
     "distilbert-base-uncased-finetuned-sst-2-english"
 )
 
+tokenizer_sentiment = AutoTokenizer.from_pretrained(
+    "distilbert-base-uncased-finetuned-sst-2-english",
+    resume_download=None,
+    force_download=False
+)
+model_sentiment = AutoModelForSequenceClassification.from_pretrained(
+    "distilbert-base-uncased-finetuned-sst-2-english",
+    resume_download=None,
+    force_download=False
+)
+
+
 # Use a pipeline as a high-level helper
 from transformers import pipeline
 
@@ -45,14 +57,19 @@ pipe(messages)
 tokenizer_dialogue = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model_dialogue = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
-import warnings
 
-# Correctly use FutureWarning from the warnings module
-warnings.filterwarnings(
-    "ignore",
-    category=FutureWarning,
-    module="huggingface_hub.file_download"
+# Define tokenizer_dialogue and model_dialogue for the dialogue generator
+tokenizer_dialogue = AutoTokenizer.from_pretrained(
+    "microsoft/DialoGPT-medium",
+    resume_download=None,
+    force_download=False
 )
+model_dialogue = AutoModelForCausalLM.from_pretrained(
+    "microsoft/DialoGPT-medium",
+    resume_download=None,
+    force_download=False
+)
+
 
 # Initialize the dialogue generation pipeline
 dialogue_generator = pipeline(
@@ -474,7 +491,12 @@ def main():
             local_index = {}
 
             # Load the embedding model
-            model = SentenceTransformer('all-MiniLM-L6-v2')
+            model = SentenceTransformer(
+                'all-MiniLM-L6-v2',
+                resume_download=None,
+                force_download=False
+            )
+
 
             # Index the chunks
             index_chunks(all_chunks, model, local_index)
